@@ -1,0 +1,36 @@
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\student;
+use Illuminate\Http\Request;
+
+class StudentController extends Controller {
+	// Obtener todos los estudiantes 
+	public function index() 
+	{ 
+		return student::all(); 
+	} 
+	// Crear un nuevo estudiante 
+	public function store(Request $request) 
+	{ 
+		$student = student::create($request->all()); 
+		return response()->json($student, 201); 
+	} 
+	// Obtener un estudiante por su ID 
+	public function show(student $student) 
+	{ 
+		return $student; 
+	} 
+	// Actualizar un estudiante 
+	public function update(Request $request, student $student) 
+	{ 
+		$student->update($request->all()); 
+		return response()->json($student); 
+	} 
+	// Eliminar un estudiante 
+	public function destroy(student $student) 
+	{ 
+		$student->delete(); 
+		return response()->json(null, 204); 
+	} 
+}
