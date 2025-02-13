@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Aeronave;
+use App\Models\Fabricante;
 
-class AeronaveController extends Controller
+class FabricanteController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Aeronave::all();
+        return Fabricante::all();
     }
 
     /**
@@ -21,33 +21,33 @@ class AeronaveController extends Controller
      */
     public function store(Request $request)
     {
-        $aeronave = Aeronave::create($request->all());
-	return response()->json($aeronave, 201);
+        $fabricante = Fabricante::create($request->all());
+	return response()->json($fabricante, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Aeronave $aeronave)
+    public function show(Fabricante $fabricante)
     {
-        return $aeronave;
+        return $fabricante;
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Aeronave $aeronave)
+    public function update(Request $request, Fabricante $fabricante)
     {
-        $aeronave->update($request->all());
-	return response()->json($aeronave);
+        $fabricante->update($request->all());
+	return response()->json($fabricante);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Aeronave $aeronave)
+    public function destroy(Fabricante $fabricante)
     {
-        $aeronave->delete();
-	return respose()->json(null, 204);
+        $fabricante->delete();
+	return response()->json(null, 204);
     }
 }
