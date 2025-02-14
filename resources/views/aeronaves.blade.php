@@ -25,6 +25,14 @@
         <input type="text" id="pais" placeholder="País" required>
         <button type="submit">Agregar Fabricante</button>
     </form>
+
+    <h2>Actualizar Fabricante</h2>
+    <form id="fabricanteUpdateForm" style="display:none;">
+        <input type="hidden" id="updateFabricanteId">
+        <input type="text" id="updateNombreFabricante" placeholder="Nuevo Nombre" required>
+        <input type="text" id="updatePais" placeholder="Nuevo País" required>
+        <button type="submit">Actualizar Fabricante</button>
+    </form>
     
     <h2>Agregar Nueva Aeronave</h2>
     <form id="aeronaveForm">
@@ -34,6 +42,15 @@
         </select>
         <input type="number" id="anyoFabricacion" placeholder="Año de Fabricación" required>
         <button type="submit">Agregar Aeronave</button>
+    </form>
+
+    <h2>Actualizar Aeronave</h2>
+    <form id="aeronaveUpdateForm" style="display:none;">
+        <input type="hidden" id="updateAeronaveId">
+        <input type="text" id="updateNombreAeronave" placeholder="Nuevo Nombre" required>
+        <select id="updateFabricante" required></select>
+        <input type="number" id="updateAnyoFabricacion" placeholder="Nuevo Año de Fabricación" required>
+        <button type="submit">Actualizar Aeronave</button>
     </form>
 
     <script>
@@ -50,6 +67,7 @@
                     container.innerHTML += `
                         <div class="item" data-id="${fabricante.id}">
                             <h3>${fabricante.nombre} (${fabricante.pais})</h3>
+                            <button onclick="editFabricante(${fabricante.id})">Editar</button>
                             <button onclick="deleteFabricante(${fabricante.id})">Eliminar</button>
                         </div>`;
                     fabricanteSelect.innerHTML += `<option value="${fabricante.id}">${fabricante.nombre}</option>`;
@@ -69,6 +87,7 @@
                         container.innerHTML += `
                             <div class="item" data-id="${aeronave.id}">
                                 <h3>${aeronave.nombre} (${fabricanteNombre}, ${aeronave.anyoFabricacion})</h3>
+                                <button onclick="editAeronave(${aeronave.id})">Editar</button>
                                 <button onclick="deleteAeronave(${aeronave.id})">Eliminar</button>
                             </div>`;
                     });
@@ -90,10 +109,42 @@
                   document.getElementById('fabricantes').innerHTML += `
                       <div class="item" data-id="${fabricante.id}">
                           <h3>${fabricante.nombre} (${fabricante.pais})</h3>
+                          <button onclick="editFabricante(${fabricante.id})">Editar</button>
                           <button onclick="deleteFabricante(${fabricante.id})">Eliminar</button>
                       </div>`;
                   document.getElementById('fabricante').innerHTML += `<option value="${fabricante.id}">${fabricante.nombre}</option>`;
                   document.getElementById('fabricanteForm').reset();
+              });
+        });
+
+        // Editar Fabricante
+        function editFabricante(id) {
+            const fabricante = fabricantes[id];
+            const fabricanteData = document.querySelector(`.item[data-id="${id}"]`);
+            const nombre = fabricanteData.querySelector('h3').textContent.split(' ')[0];
+            const pais = fabricanteData.querySelector('h3').textContent.split(' ')[1];
+
+            document.getElementById('updateFabricanteId').value = id;
+            document.getElementById('updateNombreFabricante').value = nombre;
+            document.getElementById('updatePais').value = pais;
+            document.getElementById('fabricanteUpdateForm').style.display = 'block';
+        }
+
+        // Actualizar Fabricante
+        document.getElementById('fabricanteUpdateForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const id = document.getElementById('updateFabricanteId').value;
+            const nombre = document.getElementById('updateNombreFabricante').value;
+            const pais = document.getElementById('updatePais').value;
+            fetch(`/api/fabricantes/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, pais })
+            }).then(response => response.json())
+              .then(fabricante => {
+                  const fabricanteData = document.querySelector(`.item[data-id="${id}"]`);
+                  fabricanteData.querySelector('h3').textContent = `${fabricante.nombre} (${fabricante.pais})`;
+                  document.getElementById('fabricanteUpdateForm').style.display = 'none';
               });
         });
 
@@ -111,6 +162,48 @@
               .then(() => {
                   cargarAeronaves();
                   document.getElementById('aeronaveForm').reset();
+              });
+        });
+
+        // Editar Aeronave
+        function editAeronave(id) {
+            fetch(`/api/aeronaves/${id}`)
+                .then(response => response.json())
+                .then(aeronave => {
+                    document.getElementById('updateAeronaveId').value = aeronave.id;
+                    document.getElementById('updateNombreAeronave').value = aeronave.nombre; // Ahora debería estar correcto
+                    document.getElementById('updateAnyoFabricacion').value = aeronave.anyoFabricacion;
+
+                    const fabricanteSelect = document.getElementById('updateFabricante');
+                    fabricanteSelect.innerHTML = ''; // Limpiar las opciones anteriores
+                    Object.keys(fabricantes).forEach(fabricanteId => {
+                        const option = document.createElement('option');
+                        option.value = fabricanteId;
+                        option.textContent = fabricantes[fabricanteId];
+                        if (fabricanteId == aeronave.fabricante) option.selected = true;
+                        fabricanteSelect.appendChild(option);
+                    });
+
+                    document.getElementById('aeronaveUpdateForm').style.display = 'block';
+                })
+                .catch(error => console.error("Error al obtener la aeronave:", error));
+        }
+
+        // Actualizar Aeronave
+        document.getElementById('aeronaveUpdateForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const id = document.getElementById('updateAeronaveId').value;
+            const nombre = document.getElementById('updateNombreAeronave').value;
+            const fabricanteId = document.getElementById('updateFabricante').value;
+            const anyoFabricacion = document.getElementById('updateAnyoFabricacion').value;
+            fetch(`/api/aeronaves/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, fabricante: fabricanteId, anyoFabricacion })
+            }).then(response => response.json())
+              .then(() => {
+                  cargarAeronaves();
+                  document.getElementById('aeronaveUpdateForm').style.display = 'none';
               });
         });
 
@@ -135,4 +228,3 @@
     </script>
 </body>
 </html>
-
