@@ -25,7 +25,7 @@ return new class extends Migration
 		$table->string('nombre');
 		$table->unsignedBigInteger('fabricante'); // FK
 		$table->year('anyoFabricacion');
-            	$table->timestamps();
+        $table->timestamps();
 
 		// Restricciones
 		$table->foreign('fabricante')->references('id')->on('fabricantes')->onDelete('cascade');
@@ -38,6 +38,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('aeronaves');
-	Schema::dropIfExists('fabricantes');
+        Schema::dropIfExists('fabricantes');
     }
 };
